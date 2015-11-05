@@ -3,28 +3,48 @@ package com.trackergroup.coordinatepicker;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends FragmentActivity {
-
+    private Button selectPositionBtn;
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private GoogleApiClient mGoogleApiClient;
+    Marker clickedPosition;
+    Button setLocationButton;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d("On create", "CREATE");
         super.onCreate(savedInstanceState);
-      //  android.os.Debug.startMethodTracing();
-        //Set the layout of this activity
         setContentView(R.layout.activity_maps);
         setUpMapIfNeeded();
+        final Button cancelButton = (Button) findViewById(R.id.cancel_location);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Perform action on click
+                Log.d("maps", "cancelButtonClicked");
+            }
+        });
+
+        setLocationButton = (Button) findViewById(R.id.set_coordinate2);
+        setLocationButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Perform action on click
+                Log.d("maps", "SelectedCoordinate: " + clickedPosition.getPosition().toString());
+            }
+        });
+        setLocationButton.setEnabled(false);
     }
 
     @Override
@@ -58,7 +78,7 @@ public class MapsActivity extends FragmentActivity {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
             // Try to obtain the map from the SupportMapFragment.
-            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_element))
                     .getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
@@ -74,9 +94,9 @@ public class MapsActivity extends FragmentActivity {
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        LatLng gjovik = new LatLng(60,20);
+        LatLng gjovik = new LatLng(60.79,10.69);
         mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-        mMap.addMarker(new MarkerOptions().position(gjovik).title("YourPosition"));
+        mMap.addMarker(new MarkerOptions().position(gjovik).title("YourPosition").alpha(0.7f));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(gjovik));
         mMap.setOnMapClickListener(new ClickedPosition(this));
     }
@@ -95,7 +115,7 @@ public class MapsActivity extends FragmentActivity {
      * Listener for clicked
      */
     private class ClickedPosition implements GoogleMap.OnMapClickListener{
-        Marker clickedPosition;
+
         MapsActivity ma;
 
         public ClickedPosition(MapsActivity ma){
@@ -108,12 +128,14 @@ public class MapsActivity extends FragmentActivity {
             if(clickedPosition != null) {
                 clickedPosition.remove();
             }
-            clickedPosition =  mMap.addMarker(new MarkerOptions().position(latLng).title("Clicked position"));
-            Log.d("ClickedLatLng", latLng.toString());
-            ma.getFragmentManager()
+            setLocationButton.setEnabled(true);
+            clickedPosition =  mMap.addMarker(new MarkerOptions().position(latLng).title("Clicked position").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+      /**      Log.d("ClickedLatLng", latLng.toString());
+            getFragmentManager()
                     .beginTransaction()
                     .add(R.id.map, new ChoosePositionDialog())
-                    .commit();
+                    .commit();**/
         }
     }
+
 }
